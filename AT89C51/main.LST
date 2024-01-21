@@ -1,0 +1,492 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: F:\Kiel Microvision\C51\BIN\C51.exe ..\main.c ROM(SMALL) BROWSE DEBUG CODE OBJECTEXTEND PREPRINT OB
+                    -JECT(main.OBJ)
+
+line level    source
+
+   1          #include <REGX51.h>
+   2          sbit rs=P3^0;
+   3          sbit rw=P3^1;
+   4          sbit en=P3^2;
+   5          sbit rd=P3^7;
+   6          sbit wr=P3^6;
+   7          sbit intr=P3^3;
+   8          sbit buzzer=P2^0;
+   9          sbit ledgreen=P2^1;
+  10          sbit ledred=P2^2;
+  11          //sbit cs=P2^6;
+  12          void lcdstart();
+  13          void commandLine(unsigned int a);
+  14          void dataLine(unsigned int b);
+  15          void display(unsigned int c);
+  16          void delay(unsigned int c);
+  17          unsigned char adc(),reading,value;
+  18          int gasflag;
+  19          void commandLine(unsigned int a)
+  20          {
+  21   1         P1=a;
+  22   1         rs=0;
+  23   1         rw=0;
+  24   1         en=1;
+  25   1         delay(1);
+  26   1         en=0;
+  27   1      }
+  28          void lcdstart()
+  29          {
+  30   1         commandLine(0x38);
+  31   1         commandLine(0x0e);
+  32   1         commandLine(0x06);
+  33   1         commandLine(0x01);
+  34   1         commandLine(0x80);
+  35   1      }
+  36          void dataLine(unsigned int b)
+  37          {
+  38   1         P1=b;
+  39   1         rs=1;
+  40   1         rw=0;
+  41   1         en=1;
+  42   1         delay(1);
+  43   1         en=0;
+  44   1      }
+  45          void display(unsigned char *p)
+  46          {
+*** WARNING C235 IN LINE 46 OF ..\main.c: parameter 1: different types
+  47   1         while(*p)
+  48   1            dataLine(*p++);
+  49   1      }
+  50          unsigned char adc()
+  51          {
+  52   1         //cs=0;
+  53   1         wr=0;
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 2   
+
+  54   1         rd=1;
+  55   1              
+  56   1         wr=1;
+  57   1         while(intr==1);
+  58   1         //cs=0;
+  59   1         rd=0;
+  60   1         value=P0;
+  61   1         rd=1;
+  62   1         //cs=1;
+  63   1         return value;
+  64   1      }
+  65          void delay(unsigned int c)
+  66          {
+  67   1         int i;
+  68   1         int j;
+  69   1         for(i=0;i<c;i++)
+  70   1         {
+  71   2            for(j=0;j<1250;j++);
+  72   2         }
+  73   1      }
+  74          void main()
+  75          {
+  76   1         lcdstart();
+  77   1              
+  78   1         
+  79   1              P0=0xFF;
+  80   1              //P2=0x00;
+  81   1         while(1)
+  82   1         {
+  83   2            display("GAS (ppm) = ");
+  84   2                reading=adc();
+  85   2                while(intr==1);
+  86   2            commandLine(0x8c);
+  87   2            dataLine((reading/100)+48);
+  88   2            dataLine(((reading/10)%10)+48);
+  89   2            dataLine((reading%10)+48);
+  90   2            commandLine(0xc0);
+  91   2                
+  92   2            if(reading>75)
+  93   2            {
+  94   3               display("GAS, VALVE OFF");
+  95   3               
+  96   3               buzzer=1;
+  97   3               ledred=1;
+  98   3               ledgreen=0;
+  99   3               delay(100);
+ 100   3               lcdstart();
+ 101   3               buzzer=0;
+ 102   3               gasflag=1;
+ 103   3               
+ 104   3               //break;
+ 105   3            }
+ 106   2            else
+ 107   2            {
+ 108   3                        if(gasflag==0)
+ 109   3                        {
+ 110   4                                
+ 111   4                                display("NO GAS VALVE ON ");
+ 112   4                                delay(1);
+ 113   4                        ledred=0;
+ 114   4                        ledgreen=1;
+ 115   4                        }
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 3   
+
+ 116   3                       else
+ 117   3                       {
+ 118   4                               display("VALVE OFF");
+ 119   4                               delay(100);
+ 120   4                               commandLine(0x80);
+ 121   4                               display("GAS SENSED BEFOR");
+ 122   4                               commandLine(0xc0);
+ 123   4                               display("INITIATE REPAIRS");
+ 124   4                               buzzer=1;
+ 125   4                               ledred=1;
+ 126   4                       ledgreen=0;
+ 127   4                               delay(100);
+ 128   4                               lcdstart();
+ 129   4                               ledred=0;
+ 130   4                       }
+ 131   3                        
+ 132   3            }
+ 133   2         }
+ 134   1      }
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 4   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION _commandLine (BEGIN)
+                                           ; SOURCE LINE # 19
+;---- Variable 'a' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 20
+                                           ; SOURCE LINE # 21
+0000 8F90              MOV     P1,R7
+                                           ; SOURCE LINE # 22
+0002 C2B0              CLR     rs
+                                           ; SOURCE LINE # 23
+0004 C2B1              CLR     rw
+                                           ; SOURCE LINE # 24
+0006 D2B2              SETB    en
+                                           ; SOURCE LINE # 25
+0008 7F01              MOV     R7,#01H
+000A 7E00              MOV     R6,#00H
+000C 1100        R     ACALL   _delay
+                                           ; SOURCE LINE # 26
+000E C2B2              CLR     en
+                                           ; SOURCE LINE # 27
+0010 22                RET     
+             ; FUNCTION _commandLine (END)
+
+             ; FUNCTION lcdstart (BEGIN)
+                                           ; SOURCE LINE # 28
+                                           ; SOURCE LINE # 29
+                                           ; SOURCE LINE # 30
+0000 7F38              MOV     R7,#038H
+0002 7E00              MOV     R6,#00H
+0004 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 31
+0006 7F0E              MOV     R7,#0EH
+0008 7E00              MOV     R6,#00H
+000A 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 32
+000C 7F06              MOV     R7,#06H
+000E 7E00              MOV     R6,#00H
+0010 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 33
+0012 7F01              MOV     R7,#01H
+0014 7E00              MOV     R6,#00H
+0016 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 34
+0018 7F80              MOV     R7,#080H
+001A 7E00              MOV     R6,#00H
+001C 0100        R     AJMP    _commandLine
+             ; FUNCTION lcdstart (END)
+
+             ; FUNCTION L?0029 (BEGIN)
+0000 75F00A            MOV     B,#0AH
+0003 84                DIV     AB
+0004 E5F0              MOV     A,B
+0006         L?0030:
+0006 2430              ADD     A,#030H
+0008 FF                MOV     R7,A
+0009 E4                CLR     A
+000A 33                RLC     A
+000B FE                MOV     R6,A
+             ; FUNCTION _dataLine (BEGIN)
+                                           ; SOURCE LINE # 36
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 5   
+
+;---- Variable 'b' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 37
+                                           ; SOURCE LINE # 38
+000C 8F90              MOV     P1,R7
+                                           ; SOURCE LINE # 39
+000E D2B0              SETB    rs
+                                           ; SOURCE LINE # 40
+0010 C2B1              CLR     rw
+                                           ; SOURCE LINE # 41
+0012 D2B2              SETB    en
+                                           ; SOURCE LINE # 42
+0014 7F01              MOV     R7,#01H
+0016 7E00              MOV     R6,#00H
+0018 1100        R     ACALL   _delay
+                                           ; SOURCE LINE # 43
+001A C2B2              CLR     en
+                                           ; SOURCE LINE # 44
+001C 22                RET     
+             ; FUNCTION _dataLine (END)
+
+             ; FUNCTION _display (BEGIN)
+                                           ; SOURCE LINE # 45
+0000 8B00        R     MOV     p,R3
+0002 8A00        R     MOV     p+01H,R2
+0004 8900        R     MOV     p+02H,R1
+                                           ; SOURCE LINE # 46
+0006         ?C0004:
+                                           ; SOURCE LINE # 47
+0006 AB00        R     MOV     R3,p
+0008 AA00        R     MOV     R2,p+01H
+000A A900        R     MOV     R1,p+02H
+000C 1100        E     ACALL   ?C?CLDPTR
+000E 6013              JZ      ?C0006
+                                           ; SOURCE LINE # 48
+0010 0500        R     INC     p+02H
+0012 E500        R     MOV     A,p+02H
+0014 7002              JNZ     ?C0026
+0016 0500        R     INC     p+01H
+0018         ?C0026:
+0018 14                DEC     A
+0019 F9                MOV     R1,A
+001A 1100        E     ACALL   ?C?CLDPTR
+001C FF                MOV     R7,A
+001D 7E00              MOV     R6,#00H
+001F 1100        R     ACALL   _dataLine
+0021 80E3              SJMP    ?C0004
+                                           ; SOURCE LINE # 49
+0023         ?C0006:
+0023 22                RET     
+             ; FUNCTION _display (END)
+
+             ; FUNCTION adc (BEGIN)
+                                           ; SOURCE LINE # 50
+                                           ; SOURCE LINE # 51
+                                           ; SOURCE LINE # 53
+0000 C2B6              CLR     wr
+                                           ; SOURCE LINE # 54
+0002 D2B7              SETB    rd
+                                           ; SOURCE LINE # 56
+0004 D2B6              SETB    wr
+0006         ?C0007:
+                                           ; SOURCE LINE # 57
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 6   
+
+0006 20B3FD            JB      intr,?C0007
+                                           ; SOURCE LINE # 59
+0009 C2B7              CLR     rd
+                                           ; SOURCE LINE # 60
+000B 858000      R     MOV     value,P0
+                                           ; SOURCE LINE # 61
+000E D2B7              SETB    rd
+                                           ; SOURCE LINE # 63
+0010 AF00        R     MOV     R7,value
+                                           ; SOURCE LINE # 64
+0012 22                RET     
+             ; FUNCTION adc (END)
+
+             ; FUNCTION L?0031 (BEGIN)
+0000 D2A0              SETB    buzzer
+0002 D2A2              SETB    ledred
+0004 C2A1              CLR     ledgreen
+0006         L?0032:
+0006 7F64              MOV     R7,#064H
+0008 7E00              MOV     R6,#00H
+             ; FUNCTION _delay (BEGIN)
+                                           ; SOURCE LINE # 65
+;---- Variable 'c' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 66
+                                           ; SOURCE LINE # 69
+;---- Variable 'i' assigned to Register 'R4/R5' ----
+000A E4                CLR     A
+000B FD                MOV     R5,A
+000C FC                MOV     R4,A
+000D         ?C0010:
+000D C3                CLR     C
+000E ED                MOV     A,R5
+000F 9F                SUBB    A,R7
+0010 EC                MOV     A,R4
+0011 9E                SUBB    A,R6
+0012 5015              JNC     ?C0016
+                                           ; SOURCE LINE # 70
+                                           ; SOURCE LINE # 71
+;---- Variable 'j' assigned to Register 'R2/R3' ----
+0014 E4                CLR     A
+0015 FB                MOV     R3,A
+0016 FA                MOV     R2,A
+0017         ?C0013:
+0017 0B                INC     R3
+0018 BB0001            CJNE    R3,#00H,?C0027
+001B 0A                INC     R2
+001C         ?C0027:
+001C BA04F8            CJNE    R2,#04H,?C0013
+001F BBE2F5            CJNE    R3,#0E2H,?C0013
+                                           ; SOURCE LINE # 72
+0022         ?C0012:
+0022 0D                INC     R5
+0023 BD0001            CJNE    R5,#00H,?C0028
+0026 0C                INC     R4
+0027         ?C0028:
+0027 80E4              SJMP    ?C0010
+                                           ; SOURCE LINE # 73
+0029         ?C0016:
+0029 22                RET     
+             ; FUNCTION _delay (END)
+
+             ; FUNCTION main (BEGIN)
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 7   
+
+                                           ; SOURCE LINE # 74
+                                           ; SOURCE LINE # 75
+                                           ; SOURCE LINE # 76
+0000 1100        R     ACALL   lcdstart
+                                           ; SOURCE LINE # 79
+0002 7580FF            MOV     P0,#0FFH
+0005         ?C0017:
+                                           ; SOURCE LINE # 81
+                                           ; SOURCE LINE # 82
+                                           ; SOURCE LINE # 83
+0005 7BFF              MOV     R3,#0FFH
+0007 7A00        R     MOV     R2,#HIGH ?SC_0
+0009 7900        R     MOV     R1,#LOW ?SC_0
+000B 1100        R     ACALL   _display
+                                           ; SOURCE LINE # 84
+000D 1100        R     ACALL   adc
+000F 8F00        R     MOV     reading,R7
+0011         ?C0019:
+                                           ; SOURCE LINE # 85
+0011 20B3FD            JB      intr,?C0019
+                                           ; SOURCE LINE # 86
+0014 7F8C              MOV     R7,#08CH
+0016 7E00              MOV     R6,#00H
+0018 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 87
+001A E500        R     MOV     A,reading
+001C 75F064            MOV     B,#064H
+001F 84                DIV     AB
+0020 1100        R     ACALL   L?0030
+                                           ; SOURCE LINE # 88
+0022 E500        R     MOV     A,reading
+0024 75F00A            MOV     B,#0AH
+0027 84                DIV     AB
+0028 120000      R     LCALL   L?0029
+                                           ; SOURCE LINE # 89
+002B E500        R     MOV     A,reading
+002D 120000      R     LCALL   L?0029
+                                           ; SOURCE LINE # 90
+0030 7FC0              MOV     R7,#0C0H
+0032 7E00              MOV     R6,#00H
+0034 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 92
+0036 D3                SETB    C
+0037 E500        R     MOV     A,reading
+0039 944B              SUBB    A,#04BH
+003B 7480              MOV     A,#080H
+003D 9480              SUBB    A,#080H
+003F 4017              JC      ?C0021
+                                           ; SOURCE LINE # 93
+                                           ; SOURCE LINE # 94
+0041 7BFF              MOV     R3,#0FFH
+0043 7A00        R     MOV     R2,#HIGH ?SC_13
+0045 7900        R     MOV     R1,#LOW ?SC_13
+0047 1100        R     ACALL   _display
+                                           ; SOURCE LINE # 96
+                                           ; SOURCE LINE # 97
+                                           ; SOURCE LINE # 98
+                                           ; SOURCE LINE # 99
+0049 120000      R     LCALL   L?0031
+                                           ; SOURCE LINE # 100
+004C 1100        R     ACALL   lcdstart
+                                           ; SOURCE LINE # 101
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 8   
+
+004E C2A0              CLR     buzzer
+                                           ; SOURCE LINE # 102
+0050 750000      R     MOV     gasflag,#00H
+0053 750001      R     MOV     gasflag+01H,#01H
+                                           ; SOURCE LINE # 105
+0056 80AD              SJMP    ?C0017
+0058         ?C0021:
+                                           ; SOURCE LINE # 107
+                                           ; SOURCE LINE # 108
+0058 E500        R     MOV     A,gasflag+01H
+005A 4500        R     ORL     A,gasflag
+005C 7014              JNZ     ?C0023
+                                           ; SOURCE LINE # 109
+                                           ; SOURCE LINE # 111
+005E 7BFF              MOV     R3,#0FFH
+0060 7A00        R     MOV     R2,#HIGH ?SC_28
+0062 7900        R     MOV     R1,#LOW ?SC_28
+0064 1100        R     ACALL   _display
+                                           ; SOURCE LINE # 112
+0066 7F01              MOV     R7,#01H
+0068 7E00              MOV     R6,#00H
+006A 1100        R     ACALL   _delay
+                                           ; SOURCE LINE # 113
+006C C2A2              CLR     ledred
+                                           ; SOURCE LINE # 114
+006E D2A1              SETB    ledgreen
+                                           ; SOURCE LINE # 115
+0070 0100        R     AJMP    ?C0017
+0072         ?C0023:
+                                           ; SOURCE LINE # 117
+                                           ; SOURCE LINE # 118
+0072 7BFF              MOV     R3,#0FFH
+0074 7A00        R     MOV     R2,#HIGH ?SC_45
+0076 7900        R     MOV     R1,#LOW ?SC_45
+0078 1100        R     ACALL   _display
+                                           ; SOURCE LINE # 119
+007A 1100        R     ACALL   L?0032
+                                           ; SOURCE LINE # 120
+007C 7F80              MOV     R7,#080H
+007E 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 121
+0080 7BFF              MOV     R3,#0FFH
+0082 7A00        R     MOV     R2,#HIGH ?SC_55
+0084 7900        R     MOV     R1,#LOW ?SC_55
+0086 1100        R     ACALL   _display
+                                           ; SOURCE LINE # 122
+0088 7FC0              MOV     R7,#0C0H
+008A 7E00              MOV     R6,#00H
+008C 1100        R     ACALL   _commandLine
+                                           ; SOURCE LINE # 123
+008E 7BFF              MOV     R3,#0FFH
+0090 7A00        R     MOV     R2,#HIGH ?SC_72
+0092 7900        R     MOV     R1,#LOW ?SC_72
+0094 1100        R     ACALL   _display
+                                           ; SOURCE LINE # 124
+                                           ; SOURCE LINE # 125
+                                           ; SOURCE LINE # 126
+                                           ; SOURCE LINE # 127
+0096 120000      R     LCALL   L?0031
+                                           ; SOURCE LINE # 128
+0099 1100        R     ACALL   lcdstart
+                                           ; SOURCE LINE # 129
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2019 10:29:14 PAGE 9   
+
+009B C2A2              CLR     ledred
+                                           ; SOURCE LINE # 130
+                                           ; SOURCE LINE # 132
+                                           ; SOURCE LINE # 133
+009D 0100        R     AJMP    ?C0017
+             ; FUNCTION main (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    332    ----
+   CONSTANT SIZE    =     89    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
